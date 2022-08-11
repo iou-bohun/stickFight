@@ -23,6 +23,7 @@ public class Player : MonoBehaviour
     private void Update()
     {
         Move();
+        if(Input.GetKeyDown(KeyCode.Z))
         Attack();
     }
 
@@ -36,12 +37,8 @@ public class Player : MonoBehaviour
         Vector3 nextPos = new Vector3(h, v, 0) * speed * Time.deltaTime;
 
         transform.position = curPos + nextPos;
-
-        if (Input.GetButtonDown("Horizontal") ||
-            Input.GetButtonUp("Horizontal"))
-        {
-            anim.SetInteger("Status",  Mathf.Abs((int)h));
-        }
+        anim.SetInteger("Status", Mathf.Abs((int)h));
+        
         if (h < 0)
         {
             transform.localScale = new Vector3(-1, 1, 1);
@@ -53,16 +50,7 @@ public class Player : MonoBehaviour
     }
     public void Attack()
     {
-        if (isAttack) return;
-        if (Input.GetKeyDown(KeyCode.Z))
-        {
             anim.SetTrigger("attack");
-            isAttack = true;
-        }
-        Invoke("AttackTime", 0.1f);
-    }
-    public void AttackTime()
-    {
-        isAttack = false;
-    }
+       }
 }
+    
