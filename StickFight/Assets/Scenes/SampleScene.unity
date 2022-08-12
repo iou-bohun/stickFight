@@ -293,6 +293,13 @@ MonoBehaviour:
   speed: 4
   curPos: 0
   nextPos: 0
+  attackStatus: 1
+  curAttack1Delay: 0
+  curAttack2Delay: 0
+  curAttack3Delay: 0
+  maxAttackDelay: 0.6
+  maxAttack2Delay: 0.6
+  maxAttack3Delay: 1
   isAttack: 0
 --- !u!1 &519420028
 GameObject:
