@@ -88,7 +88,7 @@ public class Player2 : MonoBehaviour
             m_currentAttack++;
             if (m_currentAttack > 3)
                 m_currentAttack = 1;
-            if (m_timeSinceAttack > 1f)
+            if (m_timeSinceAttack > 0.8f)
                 m_currentAttack = 1;
             anim.SetTrigger("Atk" + m_currentAttack);
             m_timeSinceAttack = 0.0f;
