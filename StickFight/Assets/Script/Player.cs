@@ -7,16 +7,18 @@ public class Player : MonoBehaviour
     public int speed;
     public float curPos;
     public float nextPos;
-
-    public float curAttackDelay;
-    public float maxAttackDealy;
-    public int attackStatus =1;
-    public bool attack3;
-   
+    public int attackStatus;
+    public float curAttack1Delay;
+    public float curAttack2Delay;
+    public float curAttack3Delay;
+    public float maxAttackDelay;
+    public float maxAttack2Delay;
+    public float maxAttack3Delay;
     
     Rigidbody2D rigidbody;
     Animator anim;
 
+    public bool isAttack;
     private void Start()
     {
         rigidbody = GetComponent<Rigidbody2D>();
@@ -28,24 +30,14 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
+        curAttack1Delay += Time.deltaTime;
+        curAttack2Delay += Time.deltaTime;
+        curAttack3Delay += Time.deltaTime;
         Move();
         Attack();
-       attackCombo();
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1") && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.99f)
-        {
-            attackStatus = 1;
-        }
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2") && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7f)
-        {
-            attack3 = true;
-        }
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2") && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.99f)
-        {
-            attack3 = false;
-        }
-        curAttackDelay += Time.deltaTime;
+        ComboAttack();
+        CcomboAttack();
     }
-
 
     public void Move()
     {
@@ -68,36 +60,43 @@ public class Player : MonoBehaviour
             transform.localScale = new Vector3(1, 1, 1);
         }
     }
-    
-    void Attack()
+    public void Attack()
     {
-        if (curAttackDelay < maxAttackDealy) return;
-        if (Input.GetKeyDown(KeyCode.Z)&&attackStatus == 1&&attack3 == false)
+        if (curAttack1Delay < maxAttackDelay||!(attackStatus ==1)) return;
+        if ((Input.GetKeyDown(KeyCode.Z)))
+            PlayAttack(0);
+        attackStatus = 1;
+    }
+    public void ComboAttack()
+    {
+        if (curAttack2Delay < maxAttack2Delay) return;
+       if(anim.GetCurrentAnimatorStateInfo(0).IsName("Blend")
+            &&anim.GetCurrentAnimatorStateInfo(0).normalizedTime>=0.7f
+            &&Input.GetKeyDown(KeyCode.Z))
         {
-            PlayAttack(attackStatus++);
-            curAttackDelay = 0;
+            PlayAttack(1);
+            curAttack2Delay = 0;
         }
     }
-    void attackCombo()
+    public void CcomboAttack()
     {
-        if (Input.GetKeyDown(KeyCode.Z) && attackStatus == 2
-           && anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
-           && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7)
+        if (curAttack3Delay < maxAttack3Delay) return;
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Blend")
+             && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7f
+             && Input.GetKeyDown(KeyCode.Z))
         {
-            PlayAttack(attackStatus++);
-            curAttackDelay = 0;
-        }
-        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2") && anim.GetCurrentAnimatorStateInfo(0).normalizedTime > 0.7f
-            && Input.GetKeyDown(KeyCode.Z) && attack3 == true)
-        {
-            PlayAttack(3);
-            curAttackDelay = 0;
+            PlayAttack(2);
+            curAttack3Delay = 0;
         }
     }
-    void PlayAttack(int attackNum)
+
+    public void PlayAttack(float num)
     {
-        anim.SetTrigger("Atk" + attackNum);
+        anim.SetFloat("Blend", num);
+        anim.SetTrigger("Atk");
+        curAttack1Delay = 0;
     }
+
     
 }
     
