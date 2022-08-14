@@ -16,8 +16,15 @@ public class Player2 : MonoBehaviour
     public float curAttackDelay;
     public float maxAttackDealy;
     public int attackStatus = 1;
+    public bool attack2;
     public bool attack3;
 
+    public Transform pos;
+    public Vector2 boxSize;
+
+    public float firstDmg = 10;
+    public float secDmg = 20;
+    public float thridDmg = 30;
     public float dmg;
 
 
@@ -36,9 +43,9 @@ public class Player2 : MonoBehaviour
     private void Update()
     {
         Move();
+        ComboCheck();
         Attack();
         Jump();
-        ComboCheck();
         IsFalling();
     
         m_timeSinceAttack += Time.deltaTime;
@@ -64,10 +71,15 @@ public class Player2 : MonoBehaviour
 
     public void Move()
     {
+        if ((anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
+            ||anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
+            ||anim.GetCurrentAnimatorStateInfo(0).IsName("Attack3"))&&ground==true)
+        {
+            return;
+        }
         float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
         Vector3 curPos = transform.position;
-        Vector3 nextPos = new Vector3(h, v, 0) * speed * Time.deltaTime;
+        Vector3 nextPos = new Vector3(h, 0, 0) * speed * Time.deltaTime;
         transform.position = curPos + nextPos;
         anim.SetInteger("Status", Mathf.Abs((int)h));
         if (h < 0)
@@ -83,36 +95,92 @@ public class Player2 : MonoBehaviour
 
    void Attack()
     {
+        float h = Input.GetAxisRaw("Horizontal");
         if (Input.GetKeyDown(KeyCode.Z) && m_timeSinceAttack > 0.3f)
         {
-            m_currentAttack++;
-            if (m_currentAttack > 3)
-                m_currentAttack = 1;
-            if (m_timeSinceAttack > 0.8f)
-                m_currentAttack = 1;
+            AttackMove(h);
+            AttackCheck();
+           
             anim.SetTrigger("Atk" + m_currentAttack);
+            Debug.Log(dmg);
             m_timeSinceAttack = 0.0f;
+
+            //#.적 공격 
+            Collider2D[] collider2Ds = Physics2D.OverlapBoxAll(pos.position, boxSize,0);
+            foreach (Collider2D collider in collider2Ds)
+            {
+                if(collider.tag == "Enemy")
+                {
+                    Enemy enemy = collider.GetComponent<Enemy>();
+                    enemy.GetDmg(dmg);
+                }
+            }
         }
-        
     }
+
+    //#.플레이어 연속 공격 공격 애니메이션 0.85퍼센트 이후  z키 클릭시 실행 
     void ComboCheck()
     {
         if(Input.GetKeyDown(KeyCode.Z)
             &&anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
             &&anim.GetCurrentAnimatorStateInfo(0).normalizedTime>=0.85f)
         {
-            Debug.Log("dd");
-            Debug.Log(dmg);
+            attack2 = true;
         }
         if(Input.GetKeyDown(KeyCode.Z)
             && anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
             && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.85f)
         {
-            Debug.Log("dss");
+            attack3 = true;
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    //#.공격이 어느 순서에 있는지 체크
+    void AttackCheck()
+    {
+        m_currentAttack++;
+        if (m_currentAttack > 3)
+        {
+            m_currentAttack = 1;
+            attack2 = false;
+            attack3 = false;
+        }
+        if (m_timeSinceAttack > 0.8f)
+        {
+            m_currentAttack = 1;
+            attack2 = false;
+            attack3 = false;
+        }
+        //#. 저스트러쉬 
+        if (m_currentAttack == 2 && attack2 == true)
+        {
+            dmg = secDmg;
+        }
+        else if (m_currentAttack == 3 && attack3 == true)
+        {
+            dmg = thridDmg;
+        }
+        else if (m_currentAttack == 1)
+        {
+            dmg = firstDmg;
+        }
+    }
+
+    //#.공격시 이동
+    void AttackMove(float h)
+    {
+        if (ground == true && h > 0)
+        {
+            rigidbody.AddForce(Vector2.right * 150f);
+        }
+        else if (ground == true && h < 0)
+        {
+            rigidbody.AddForce(Vector2.left * 150);
+        }
+    }
+
+    //#.플레이어가 땅에 있는지 감지
+    private void OnTriggerStay2D(Collider2D collision)
     {
         if(collision.gameObject.tag == "Ground")
         {
@@ -126,6 +194,14 @@ public class Player2 : MonoBehaviour
         {
             ground = false;
         }
+    }
+
+
+    //#,공격 범위 표시
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(pos.position,boxSize);
     }
 }
 

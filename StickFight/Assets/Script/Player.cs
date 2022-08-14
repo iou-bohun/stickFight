@@ -84,6 +84,7 @@ public class Player : MonoBehaviour
            && anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
            && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7)
         {
+            
             PlayAttack(attackStatus++);
             curAttackDelay = 0;
         }
