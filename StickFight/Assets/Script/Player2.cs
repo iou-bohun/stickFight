@@ -47,11 +47,11 @@ public class Player2 : MonoBehaviour
         Attack();
         Jump();
         IsFalling();
-    
+
         m_timeSinceAttack += Time.deltaTime;
 
     }
-    
+
     public void Jump()
     {
         if (jumpCount >= 2) return;
@@ -72,8 +72,8 @@ public class Player2 : MonoBehaviour
     public void Move()
     {
         if ((anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
-            ||anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
-            ||anim.GetCurrentAnimatorStateInfo(0).IsName("Attack3"))&&ground==true)
+            || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
+            || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack3")) && ground == true)
         {
             return;
         }
@@ -90,44 +90,50 @@ public class Player2 : MonoBehaviour
         {
             transform.localScale = new Vector3(1, 1, 1);
         }
-       
+
     }
 
-   void Attack()
+    void Attack()
     {
         float h = Input.GetAxisRaw("Horizontal");
         if (Input.GetKeyDown(KeyCode.Z) && m_timeSinceAttack > 0.3f)
         {
             AttackMove(h);
             AttackCheck();
-           
+
             anim.SetTrigger("Atk" + m_currentAttack);
             Debug.Log(dmg);
             m_timeSinceAttack = 0.0f;
 
-            //#.적 공격 
-            Collider2D[] collider2Ds = Physics2D.OverlapBoxAll(pos.position, boxSize,0);
-            foreach (Collider2D collider in collider2Ds)
-            {
-                if(collider.tag == "Enemy")
-                {
-                    Enemy enemy = collider.GetComponent<Enemy>();
-                    enemy.GetDmg(dmg);
-                }
-            }
+            //#. 공격에 약간의 지연시간 할당
+            StartCoroutine(EnemyAttack());
         }
     }
 
+    //#.적 공격 
+    IEnumerator EnemyAttack()
+    {
+        yield return new WaitForSeconds(0.2f);
+        Collider2D[] collider2Ds = Physics2D.OverlapBoxAll(pos.position, boxSize, 0);
+        foreach (Collider2D collider in collider2Ds)
+        {
+            if (collider.tag == "Enemy")
+            {
+                Enemy enemy = collider.GetComponent<Enemy>();
+                enemy.GetDmg(dmg);
+            }
+        }
+    }
     //#.플레이어 연속 공격 공격 애니메이션 0.85퍼센트 이후  z키 클릭시 실행 
     void ComboCheck()
     {
-        if(Input.GetKeyDown(KeyCode.Z)
-            &&anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
-            &&anim.GetCurrentAnimatorStateInfo(0).normalizedTime>=0.85f)
+        if (Input.GetKeyDown(KeyCode.Z)
+            && anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
+            && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.85f)
         {
             attack2 = true;
         }
-        if(Input.GetKeyDown(KeyCode.Z)
+        if (Input.GetKeyDown(KeyCode.Z)
             && anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
             && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.85f)
         {
@@ -171,10 +177,12 @@ public class Player2 : MonoBehaviour
     {
         if (ground == true && h > 0)
         {
+            transform.localScale = new Vector3(1, 1, 1);
             rigidbody.AddForce(Vector2.right * 150f);
         }
         else if (ground == true && h < 0)
         {
+            transform.localScale = new Vector3(-1, 1, 1);
             rigidbody.AddForce(Vector2.left * 150);
         }
     }
@@ -182,7 +190,7 @@ public class Player2 : MonoBehaviour
     //#.플레이어가 땅에 있는지 감지
     private void OnTriggerStay2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Ground")
+        if (collision.gameObject.tag == "Ground")
         {
             ground = true;
             jumpCount = 0;
@@ -190,7 +198,7 @@ public class Player2 : MonoBehaviour
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if(collision.gameObject.tag == "Ground")
+        if (collision.gameObject.tag == "Ground")
         {
             ground = false;
         }
@@ -201,7 +209,7 @@ public class Player2 : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.blue;
-        Gizmos.DrawWireCube(pos.position,boxSize);
+        Gizmos.DrawWireCube(pos.position, boxSize);
     }
 }
 
