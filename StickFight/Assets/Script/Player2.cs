@@ -10,6 +10,7 @@ public class Player2 : MonoBehaviour
     public float jumpPower;
     int jumpCount;
     bool ground;
+    bool roll;
 
     private int m_currentAttack = 0;
     private float m_timeSinceAttack = 0.0f;
@@ -48,35 +49,21 @@ public class Player2 : MonoBehaviour
         Jump();
         IsFalling();
 
+
         m_timeSinceAttack += Time.deltaTime;
-
     }
 
-    public void Jump()
-    {
-        if (jumpCount >= 2) return;
-        if (Input.GetKeyDown("space"))
-        {
-            anim.SetTrigger("Jump");
-            rigidbody.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
-            jumpCount++;
-        }
-    }
-
-    public void IsFalling()
-    {
-        anim.SetFloat("InAir", rigidbody.velocity.y);
-        anim.SetBool("IsGround", ground);
-    }
+   
 
     public void Move()
     {
+        //#.공격시 키보드 이동 금지 //////////////////////////////
         if ((anim.GetCurrentAnimatorStateInfo(0).IsName("Attack1")
             || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack2")
-            || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack3")) && ground == true)
-        {
-            return;
-        }
+            || anim.GetCurrentAnimatorStateInfo(0).IsName("Attack3")) && ground == true) return;
+        /////////////////////////////////////////////////////////////
+
+        if (roll == false) speed = 4;
         float h = Input.GetAxisRaw("Horizontal");
         Vector3 curPos = transform.position;
         Vector3 nextPos = new Vector3(h, 0, 0) * speed * Time.deltaTime;
@@ -90,9 +77,31 @@ public class Player2 : MonoBehaviour
         {
             transform.localScale = new Vector3(1, 1, 1);
         }
-
+        Rolling();
     }
 
+    //#.플레이어 점프
+    public void Jump()
+    {
+        if (jumpCount >= 2) return;
+        if (Input.GetKeyDown("space"))
+        {
+            anim.SetTrigger("Jump");
+            rigidbody.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+            jumpCount++;
+            roll = false;
+            anim.SetBool("IsRoll", roll);
+        }
+    }
+
+    //#.플레이어 추락 감지
+    public void IsFalling()
+    {
+        anim.SetFloat("InAir", rigidbody.velocity.y);
+        anim.SetBool("IsGround", ground);
+    }
+
+    //#.플레이어 공격
     void Attack()
     {
         float h = Input.GetAxisRaw("Horizontal");
@@ -100,15 +109,17 @@ public class Player2 : MonoBehaviour
         {
             AttackMove(h);
             AttackCheck();
-
+            anim.SetBool("IsRoll", false);
             anim.SetTrigger("Atk" + m_currentAttack);
             Debug.Log(dmg);
             m_timeSinceAttack = 0.0f;
+            roll = false;
 
             //#. 공격에 약간의 지연시간 할당
             StartCoroutine(EnemyAttack());
         }
     }
+
 
     //#.적 공격 
     IEnumerator EnemyAttack()
@@ -140,6 +151,8 @@ public class Player2 : MonoBehaviour
             attack3 = true;
         }
     }
+
+
 
     //#.공격이 어느 순서에 있는지 체크
     void AttackCheck()
@@ -184,6 +197,24 @@ public class Player2 : MonoBehaviour
         {
             transform.localScale = new Vector3(-1, 1, 1);
             rigidbody.AddForce(Vector2.left * 150);
+        }
+    }
+
+    //#.플레이어 구르기 
+    void Rolling()
+    {
+        if (!(rigidbody.velocity.y == 0)) return;
+        if(Input.GetKeyDown(KeyCode.X))
+        {
+            roll = true;
+            anim.SetTrigger("IsRoll");
+            speed = 7;
+        }
+        if(anim.GetCurrentAnimatorStateInfo(0).IsName("Roll")
+            && anim.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+        {
+            roll = false;
+            anim.SetBool("IsRoll", roll);
         }
     }
 
