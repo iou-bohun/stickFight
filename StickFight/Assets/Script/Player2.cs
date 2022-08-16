@@ -27,7 +27,7 @@ public class Player2 : MonoBehaviour
     public float secDmg = 20;
     public float thridDmg = 30;
     public float dmg;
-
+   
 
     Rigidbody2D rigidbody;
     Animator anim;
