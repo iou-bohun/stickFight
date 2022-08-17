@@ -700,7 +700,7 @@ GameObject:
   - component: {fileID: 309915796}
   m_Layer: 0
   m_Name: HeroKnight_0
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -922,7 +922,7 @@ GameObject:
   - component: {fileID: 316485183}
   m_Layer: 0
   m_Name: Trash Monster-Sheet_6
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -941,7 +941,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hp: 100
   distance: 0
-  dmg: 0
+  dmg: 1
+  curAttackDelay: 1
+  maxAttackDelay: 3
   player: {fileID: 309915788}
   pos: {fileID: 301882374}
   boxSize: {x: 1, y: 1.6}
@@ -965,7 +967,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!61 &316485180
 BoxCollider2D:
   m_ObjectHideFlags: 0
