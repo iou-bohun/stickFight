@@ -8,9 +8,11 @@ public class Player2 : MonoBehaviour
     public float curPos;
     public float nextPos;
     public float jumpPower;
+    public float hp;
     int jumpCount;
     bool ground;
     bool roll;
+    bool moveDown;
 
     private int m_currentAttack = 0;
     private float m_timeSinceAttack = 0.0f;
@@ -65,6 +67,7 @@ public class Player2 : MonoBehaviour
 
         if (roll == false) speed = 4;
         float h = Input.GetAxisRaw("Horizontal");
+        
         Vector3 curPos = transform.position;
         Vector3 nextPos = new Vector3(h, 0, 0) * speed * Time.deltaTime;
         transform.position = curPos + nextPos;
@@ -83,8 +86,9 @@ public class Player2 : MonoBehaviour
     //#.플레이어 점프
     public void Jump()
     {
-        if (jumpCount >= 2) return;
-        if (Input.GetKeyDown("space"))
+        float v = Input.GetAxisRaw("Vertical");
+        if (jumpCount >= 2 || moveDown == true) return;
+        if (Input.GetKeyDown("space")&&v>=0)
         {
             anim.SetTrigger("Jump");
             rigidbody.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
@@ -92,6 +96,20 @@ public class Player2 : MonoBehaviour
             roll = false;
             anim.SetBool("IsRoll", roll);
         }
+        else if(Input.GetKeyDown("space")&&ground == true &&v<0)
+        {
+            BoxCollider2D collider = GetComponent<BoxCollider2D>();
+            collider.isTrigger = true;
+            moveDown = true;
+            Invoke("DownJumpReturn", 0.5f);
+        }
+    }
+
+    void DownJumpReturn()
+    {
+        moveDown = false;
+        BoxCollider2D collider = GetComponent<BoxCollider2D>();
+        collider.isTrigger = false;
     }
 
     //#.플레이어 추락 감지
@@ -120,7 +138,6 @@ public class Player2 : MonoBehaviour
         }
     }
 
-
     //#.적 공격 
     IEnumerator EnemyAttack()
     {
@@ -135,6 +152,7 @@ public class Player2 : MonoBehaviour
             }
         }
     }
+
     //#.플레이어 연속 공격 공격 애니메이션 0.85퍼센트 이후  z키 클릭시 실행 
     void ComboCheck()
     {
@@ -215,6 +233,15 @@ public class Player2 : MonoBehaviour
         {
             roll = false;
             anim.SetBool("IsRoll", roll);
+        }
+    }
+
+    public void GetDmg(float dmg)
+    {
+        hp = hp - dmg;
+        if (hp <= 0)
+        {
+            Destroy(gameObject);
         }
     }
 
